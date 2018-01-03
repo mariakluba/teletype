@@ -1,0 +1,41 @@
+Settings.ProductElement = 'offer'
+Settings.EnablePreMapMode = True
+grouped = {}
+
+def MapXml(i, o):
+
+    groupKey = i.Element('imgs').Element('img').Value
+    
+    if IsPreMapMode == True:
+        if groupKey not in grouped:
+            #create new element with grouping lists (lists will contain grouped values).
+            grouped[groupKey] = {'sizes' : []}
+            
+        #add to lists containing grouped values.
+        if i.Element('sizes') != None:
+            grouped[groupKey]['sizes'].append(i.Element('sizes').Value)
+    else:
+        o.ProductId = i.Element('id').Value
+        o.Name = i.Element('name').Value
+        o.Category = i.Element('cat').Value
+        o.Brand = i.Element('brand').Value
+        o.Description = i.Element('desc').Value
+        o.Price = i.Element('price').Value
+        o.OldPrice = i.Element('old_price').Value
+        o.Url = i.Element('url').Value
+        if i.Element('imgs').Elements('img') == None:
+            o.Skip = True
+        for img in i.Element('imgs').Elements('img'):
+            o.AddImage(img.Value)
+        if o.Images.Count > 0:
+            o.Images[0].IsDefault = True
+        o.Sizes.AddRange(i.Element('sizes').Value.split(',')) 
+       #find grouped values in global variable and add them to product.
+        if groupKey in grouped:
+            o.Sizes.AddRange(grouped[groupKey]['sizes'])
+               
+            # this will prevent duplicated products - only one product with same groupKey value will be added
+            del grouped[groupKey]
+        else:
+            o.Grouped = True
+						
